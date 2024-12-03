@@ -32,9 +32,17 @@ app.post('/move', async (req, res) => {
     }
 
     try {
-        const gcodeCommand = `G1 ${axis.toUpperCase()}${distance} F1500`;
+        await fetch(`${BASE_URL}/printer/command`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Api-Key': API_KEY
+            },
+            body: JSON.stringify({ command: 'G91' })
+        });
 
-        const response = await fetch(`${BASE_URL}/printer/command`, {
+        const gcodeCommand = `G1 ${axis.toUpperCase()}${distance} F1500`;
+        await fetch(`${BASE_URL}/printer/command`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -43,17 +51,11 @@ app.post('/move', async (req, res) => {
             body: JSON.stringify({ command: gcodeCommand })
         });
 
-        if (!response.ok) {
-            return res.status(500).send('Failed to send G-code command');
-        }
-
-        const data = await response.json();
-        res.json(data);
+        res.send('OK');
     } catch {
         res.status(500).send('Error');
     }
 });
-
 
 const PORT = 3000;
 app.listen(PORT);
