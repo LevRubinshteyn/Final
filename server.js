@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
-
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +10,7 @@ app.use(express.json());
 const API_KEY = process.env.API_KEY;
 const BASE_URL = process.env.BASE_URL || 'http://98.14.0.58/api';
 
+/// 1ST Endpoint (GET)
 app.get('/printer', async (req, res) => {
     try {
         const response = await fetch(`${BASE_URL}/printer`, {
@@ -18,17 +18,17 @@ app.get('/printer', async (req, res) => {
         });
         const data = await response.json();
         res.json(data);
-    } catch (error) {
-        console.error('Error fetching printer data:', error);
-        res.status(500).send('Error fetching printer data');
+    } catch {
+        res.status(500).send('Error');
     }
 });
 
+//// 2ND Endpoint (POST)
 app.post('/move', async (req, res) => {
     const { axis, distance } = req.body;
 
-    if (!axis || !distance) {
-        return res.status(400).json({ error: 'Axis and distance are required' });
+    if (!axis || typeof distance !== 'number') {
+        return res.status(400).send('Invalid input');
     }
 
     try {
@@ -43,14 +43,12 @@ app.post('/move', async (req, res) => {
                 [axis]: distance
             })
         });
-
         const data = await response.json();
         res.json(data);
-    } catch (error) {
-        console.error('Error sending move command:', error);
-        res.status(500).json({ error: 'Failed to send move command' });
+    } catch {
+        res.status(500).send('Error');
     }
 });
 
 const PORT = 3000;
-app.listen(PORT, () => console.log(`Proxy server running on port ${PORT}`));
+app.listen(PORT);
